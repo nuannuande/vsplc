@@ -18,5 +18,5 @@ use files "*.vsplc"
 </p>
 
 
- demo.vsplc<a href="https://github.com/nuannuande/vsplc">demo file</a>
+<a href="https://github.com/nuannuande/vsplc/blob/main/demo.vsplc">demo file</a>
 ****
