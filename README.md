@@ -4,7 +4,10 @@ Base on Blockly
 ## Features
 
 Blockly Programm PLC
+
 Support ModbusTCP 
+
+Support ModbusRTU
 
 use files "*.vsplc"
 
