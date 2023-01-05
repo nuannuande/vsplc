@@ -1,7 +1,10 @@
 
-import { Console } from 'console';
+
 import * as vscode from 'vscode';
 const modbus = require('jsmodbus');
+const { SerialPort } = require('serialport');
+var splist: any[] = [];
+
 const net = require('net');
 
 class PLC {
@@ -17,6 +20,7 @@ class PLC {
     private init() {
         vscode.window.showInformationMessage('Welcome Use VSPLC');
         this.state = 0;
+
         if (this.cycle !== null) {
             clearInterval(this.cycle);
         }
@@ -25,16 +29,25 @@ class PLC {
         this.scan = num;
     }
     public start(code: string) {
-
+        this.stop();
+       
         this.code = code;
         if (this.cycle !== null) {
             clearInterval(this.cycle);
         }
-
-        this.logic(code);
+        setTimeout(()=>{
+            this.logic(code);
+        },500);
+       
 
     }
     public stop() {
+     
+        splist.forEach(ele => {
+            ele.close();
+        });
+
+        splist=[];
         if (this.cycle !== null) {
             clearInterval(this.cycle);
         }
@@ -54,7 +67,7 @@ class PLC {
                 vsplcWholeCounter++;
             },10)
             `;
-          
+
             try {
                 this.cycle = eval(ncode);
             } catch (e) {
@@ -71,12 +84,12 @@ class PLC {
         if (sindex >= 0) {
             let eindex = code.indexOf('//endplccyclecode');//17
             if (eindex >= 0) {
-                let nres = code.slice(sindex+19, eindex);
+                let nres = code.slice(sindex + 19, eindex);
                 nres = nres.replace('//startplccyclecode', "");
                 res += nres;
 
                 // console.log("***********:" + code.slice(eindex).replace('//endplccyclecode', ""));
-                this.findCode(code.slice(0, sindex)+code.slice(eindex+17), res, cb);
+                this.findCode(code.slice(0, sindex) + code.slice(eindex + 17), res, cb);
             }
 
         } else {

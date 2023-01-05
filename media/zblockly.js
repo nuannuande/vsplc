@@ -24,6 +24,7 @@ Blockly.Blocks['modbusclient'] = {
         this.setHelpUrl("");
     }
 };
+
 Blockly.JavaScript['modbusclient'] = function (block) {
     var text_name = block.getFieldValue('name');
     var text_ip = block.getFieldValue('ip');
@@ -39,6 +40,72 @@ Blockly.JavaScript['modbusclient'] = function (block) {
     var code = `var socket_${text_name} = new net.Socket();
     var client_${text_name} = new modbus.client.TCP(socket_${text_name}, ${text_id});
     socket_${text_name}.connect({ "host": "${text_ip}", "port": ${text_port} });
+
+    //startplccyclecode
+    if(vsplcWholeCounter%${text_scan}==0){
+        ${statements_cmd}
+    }
+    //endplccyclecode
+    `;
+    // TODO: Change ORDER_NONE to the correct strength.
+    return code;
+};
+
+Blockly.Blocks['modbusclient_RTU'] = {
+    init: function () {
+        this.appendDummyInput()
+            .appendField("modbusRTUClient:")
+            .appendField(new Blockly.FieldTextInput("rc1"), "name")
+            .appendField("COM:")
+            .appendField(new Blockly.FieldTextInput("COM1"), "com")
+            .appendField("baudRate:")
+            .appendField(new Blockly.FieldDropdown([["9600", "9600"], ["4800", "4800"], ["14400", "14400"], ["19200", "19200"], ["38400", "38400"], ["115200", "115200"]]), "baudRate")
+            .appendField("dataBits:")
+            .appendField(new Blockly.FieldDropdown([["8", "8"], ["7", "7"], ["6", "6"]]), "dataBits")
+            .appendField("stopBits:")
+            .appendField(new Blockly.FieldDropdown([["1", "1"], ["2", "2"]]), "stopBits")
+            .appendField("parity:")
+            .appendField(new Blockly.FieldDropdown([["none", "none"], ["even", "even"], ["odd", "odd"]]), "parity");
+        this.appendStatementInput("cmd")
+            .setCheck(null)
+            .appendField("id:")
+            .appendField(new Blockly.FieldTextInput("1"), "id")
+            .appendField("scan:")
+            .appendField(new Blockly.FieldNumber(5, 0), "scan")
+            .appendField("x10ms");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(210);
+        this.setTooltip("");
+        this.setHelpUrl("");
+    }
+};
+
+Blockly.JavaScript['modbusclient_RTU'] = function (block) {
+    var text_name = block.getFieldValue('name');
+    var com = block.getFieldValue('com');
+    var baudRate = block.getFieldValue('baudRate');
+    var dataBits = block.getFieldValue('dataBits');
+    var stopBits = block.getFieldValue('stopBits');
+    var parity = block.getFieldValue('parity');
+    var text_scan = block.getFieldValue('scan');
+    var text_id = block.getFieldValue('id');
+    var statements_cmd = Blockly.JavaScript.statementToCode(block, 'cmd');
+
+    statements_cmd = statements_cmd.replace(/clientreplace/g, `client_${text_name}`);
+
+    // TODO: Assemble JavaScript into code variable.
+
+    var code = `var SerialPort_${com} = new SerialPort({
+        path:"${com}",
+        baudRate:${baudRate},
+        dataBits:${dataBits},
+        stopBits:${stopBits},
+        parity:"${parity}"
+    });
+    var client_${text_name} = new modbus.client.RTU(SerialPort_${com}, ${text_id});
+    splist.push(SerialPort_${com});
+   
 
     //startplccyclecode
     if(vsplcWholeCounter%${text_scan}==0){
@@ -447,6 +514,10 @@ var toolbox = {
                 {
                     "kind": "block",
                     "type": "modbusclient"
+                },
+                {
+                    "kind": "block",
+                    "type": "modbusclient_RTU"
                 },
                 {
                     "kind": "block",
